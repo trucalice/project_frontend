@@ -1,0 +1,26 @@
+.navbar-brand {
+  font-size: 1rem;
+  font-weight: normal;
+  transition: all 0.2s ease;
+}
+.navbar-brand:hover, .navbar-brand.active {
+  font-weight: bold;
+  color: #000 !important;
+}
+.nav-link {
+  font-size: 1rem;
+  font-weight: normal;
+}
+.navbar {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.footer {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  background-color: white;
+  padding: 1rem 0;
+  border-top: 1px solid #dee2e6;
+  margin-top: 3rem;
+}
+.lead {
+  font-weight: 400;
+}
