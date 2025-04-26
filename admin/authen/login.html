@@ -10,10 +10,10 @@
 <body>
     <nav class="navbar">
         <div class="container-fluid">
-            <a class="navbar-brand" href="../../index.html">VocabApp</a>
+            <a class="navbar-brand" href="/index.html">VocabApp</a>
             <div class="auth-links">
-                <a href="login.html" class="btn btn-primary">Login</a>
-                <a href="register.html" class="btn btn-success">Register</a>
+                <a href="/admin/authen/login.html" class="btn btn-primary">Login</a>
+                <a href="/admin/authen/register.html" class="btn btn-success">Register</a>
             </div>
         </div>
     </nav>
@@ -38,5 +38,26 @@
     </div>
 
     <script src="authen.js"></script>
+    <script>
+      document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        // Lấy danh sách người dùng từ localStorage
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        const user = users.find(u => u.email === email && u.password === password);
+        const alertBox = document.getElementById('alertBox');
+        if (user) {
+          // Lưu thông tin đăng nhập (ví dụ: tên người dùng)
+          localStorage.setItem('currentUser', JSON.stringify(user));
+          // Chuyển hướng sang trang giao diện người dùng
+          window.location.href = '../../index.html';
+        } else {
+          alertBox.className = 'alert alert-danger mt-3';
+          alertBox.textContent = 'Email hoặc mật khẩu không đúng.';
+          alertBox.classList.remove('d-none');
+        }
+      });
+    </script>
 </body>
 </html> 

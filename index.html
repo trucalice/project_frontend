@@ -6,27 +6,67 @@
   <title>VocabApp - Trang chủ</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="./main.css">
+  <style>
+    .navbar {
+      box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+      background: #fff;
+    }
+    .main-welcome {
+      min-height: 70vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .main-welcome h2 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .main-welcome p {
+      font-size: 1.1rem;
+      color: #444;
+      margin-bottom: 24px;
+    }
+    .btn-quiz {
+      background: #5cb85c;
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      padding: 8px 28px;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+    .btn-quiz:hover {
+      background: #449d44;
+    }
+    .navbar-nav .nav-link:hover, .navbar-nav .nav-link.active {
+      background: none;
+      color: #1976d2 !important;
+      font-weight: 500;
+      border-radius: 0;
+      transition: color 0.15s;
+    }
+  </style>
 </head>
 <body class="bg-light">
-  <nav class="navbar navbar-expand-lg navbar-light bg-white">
+  <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid px-2">
-      <a class="navbar-brand active me-1" href="index.html">VocabApp</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+      <a class="navbar-brand fw-bold" href="index.html">VocabApp</a>
       <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav">
-          <li class="nav-item"><a class="nav-link px-2" href="#">Dashboard</a></li>
-          <li class="nav-item"><a class="nav-link px-2" href="#">Categories</a></li>
-          <li class="nav-item"><a class="nav-link px-2" href="#">Vocabulary</a></li>
-          <li class="nav-item"><a class="nav-link px-2" href="#">Flashcards</a></li>
-          <li class="nav-item"><a class="nav-link px-2" href="#">Test</a></li>
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="/categories.html">Categories</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Vocabulary</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Flashcards</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Quiz</a></li>
         </ul>
+        <span class="navbar-text me-3" id="userNameDisplay" style="display:none"></span>
+        <button class="btn btn-danger" id="logoutBtn" style="display:none">Logout</button>
       </div>
     </div>
   </nav>
 
-  <div class="container text-center mt-5">
+  <div class="main-welcome text-center" id="welcomeBox">
     <h2>Welcome to VocabApp</h2>
     <p class="lead">Learn and practice vocabulary with flashcards and quizzes</p>
     <div class="d-flex justify-content-center gap-3 mt-4">
@@ -40,5 +80,25 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Kiểm tra người dùng đã đăng nhập chưa
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (currentUser && currentUser.firstName && currentUser.lastName) {
+      // Hiển thị tên người dùng và nút logout
+      document.getElementById('userNameDisplay').style.display = 'inline';
+      document.getElementById('logoutBtn').style.display = 'inline-block';
+      document.getElementById('userNameDisplay').textContent = `Hi, ${currentUser.firstName} ${currentUser.lastName}`;
+      document.getElementById('logoutBtn').onclick = function() {
+        localStorage.removeItem('currentUser');
+        window.location.reload();
+      };
+      // Hiển thị giao diện chào mừng
+      document.getElementById('welcomeBox').innerHTML = `
+        <h2>Chào mừng bạn đã quay lại học, <span style='font-weight:700'>${currentUser.firstName} ${currentUser.lastName}</span>!</h2>
+        <p>Tiếp tục học từ vựng và cải thiện kỹ năng của bạn ngay hôm nay.</p>
+        <button class='btn btn-quiz'>Làm Quiz</button>
+      `;
+    }
+  </script>
 </body>
 </html>
