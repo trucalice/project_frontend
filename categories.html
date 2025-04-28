@@ -11,7 +11,7 @@
     .navbar { box-shadow: 0 2px 6px rgba(0,0,0,0.07); background: #fff; }
     .categories-container { max-width: 100vw; width: 100vw; margin: 48px 0 0 0; flex: 1 0 auto; padding-left: 24px; padding-right: 24px; }
     .categories-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
-    .categories-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 0; color: #222; letter-spacing: -0.5px; }
+    .categories-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 0; color: #222; letter-spacing: -0.5px; }
     .btn-add-category { background: #22c55e; color: #fff; border: none; border-radius: 12px; padding: 10px 28px; font-size: 1rem; font-weight: 400; box-shadow: 0 2px 8px rgba(34,197,94,0.08); margin-left: 0; }
     .btn-add-category:hover { background: #449d44; }
     .search-bar { margin-bottom: 16px; }
@@ -24,20 +24,6 @@
       font-weight: 500;
       border-radius: 0;
       transition: color 0.15s;
-    }
-    .all-categories-bar {
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-      color: #0e0e0f;
-      font-size: 1rem;
-      font-weight: 400;
-      padding: 10px 22px 10px 22px;
-      margin-bottom: 14px;
-      margin-left: 0;
-      text-align: left;
-      width: 100%;
-      max-width: 100%;
     }
     th { color: #6B7280 !important; text-transform: uppercase; font-size: 0.92rem; font-weight: 600; border: none; letter-spacing: 1px; padding: 14px 0 14px 32px; text-align: left; }
     .categories-table a { text-decoration: none; }
@@ -53,9 +39,10 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link" href="/index.html">Dashboard</a></li>
           <li class="nav-item"><a class="nav-link active" href="/categories.html">Categories</a></li>
-    
+          <li class="nav-item"><a class="nav-link" href="/vocabulary.html">Vocabulary</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Flashcards</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Quiz</a></li>
         </ul>
       </div>
     </div>
@@ -70,10 +57,9 @@
     <table class="table categories-table">
       <thead>
         <tr>
-          <th class="word-col" style="width:35%">Word</th>
-          <th style="width:33%">Meaning</th>
-          <th style="width:20%">CATEGORY</th>
-          <th style="width:12%">ACTIONS</th>
+          <th class="word-col" style="width:40%">Name</th>
+          <th style="width:40%">Description</th>
+          <th style="width:20%">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -82,27 +68,23 @@
     </table>
   </div>
 
-  <!-- Modal Thêm mới từ vựng -->
+  <!-- Modal Thêm mới danh mục -->
   <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="addCategoryModalLabel">Add New Word</h5>
+          <h5 class="modal-title" id="addCategoryModalLabel">Add New Category</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <form id="addCategoryForm">
             <div class="mb-3">
-              <label for="catWord" class="form-label">Word</label>
-              <input type="text" class="form-control" id="catWord" required />
+              <label for="catName" class="form-label">Name</label>
+              <input type="text" class="form-control" id="catName" required />
             </div>
             <div class="mb-3">
-              <label for="catMeaning" class="form-label">Meaning</label>
-              <input type="text" class="form-control" id="catMeaning" required />
-            </div>
-            <div class="mb-3">
-              <label for="catTopic" class="form-label">Category</label>
-              <input type="text" class="form-control" id="catTopic" />
+              <label for="catDesc" class="form-label">Description</label>
+              <input type="text" class="form-control" id="catDesc" />
             </div>
             <div class="text-danger small" id="catError" style="display:none"></div>
           </form>
@@ -131,7 +113,7 @@
             </div>
             <div class="mb-3">
               <label for="editCatDesc" class="form-label">Description</label>
-              <textarea class="form-control" id="editCatDesc"></textarea>
+              <input type="text" class="form-control" id="editCatDesc" />
             </div>
             <div class="text-danger small" id="editCatError" style="display:none"></div>
           </form>
@@ -144,7 +126,7 @@
     </div>
   </div>
 
-  <!-- Modal Xác nhận xóa -->
+  <!-- Modal Xác nhận xóa danh mục -->
   <div class="modal fade" id="deleteCategoryModal" tabindex="-1" aria-labelledby="deleteCategoryModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -178,7 +160,7 @@
     // Hiển thị danh sách danh mục từ localStorage với filter
     let searchKeyword = '';
     function renderCategories() {
-      const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+      const categories = JSON.parse(localStorage.getItem('categoryList') || '[]');
       const tbody = document.querySelector('.categories-table tbody');
       tbody.innerHTML = '';
       // Lọc theo từ khóa
@@ -192,7 +174,6 @@
         tr.innerHTML = `
           <td class="word-col">${cat.name}</td>
           <td>${cat.description || ''}</td>
-          <td>${cat.topic || ''}</td>
           <td>
             <a href="#" class="edit-link" data-idx="${categories.indexOf(cat)}" style="color:#3b5bdb; margin-right:12px;">Edit</a>
             <a href="#" class="delete-link" data-idx="${categories.indexOf(cat)}" style="color:#e74c3c;">Delete</a>
@@ -222,47 +203,41 @@
     });
     renderCategories();
 
-    // Modal thêm mới từ vựng
+    // Modal thêm mới danh mục
     document.querySelector('.btn-add-category').onclick = function() {
-      document.getElementById('catWord').value = '';
-      document.getElementById('catMeaning').value = '';
-      document.getElementById('catTopic').value = '';
+      document.getElementById('catName').value = '';
+      document.getElementById('catDesc').value = '';
       document.getElementById('catError').style.display = 'none';
       const modal = new bootstrap.Modal(document.getElementById('addCategoryModal'));
       modal.show();
     };
     document.getElementById('addCategoryForm').onsubmit = function(e) {
       e.preventDefault();
-      const word = document.getElementById('catWord').value.trim();
-      const meaning = document.getElementById('catMeaning').value.trim();
-      const topic = document.getElementById('catTopic').value.trim();
+      const name = document.getElementById('catName').value.trim();
+      const desc = document.getElementById('catDesc').value.trim();
       const error = document.getElementById('catError');
-      let categories = JSON.parse(localStorage.getItem('categories') || '[]');
-      if (!word) {
-        error.textContent = 'Word is required.';
+      let categories = JSON.parse(localStorage.getItem('categoryList') || '[]');
+      if (!name) {
+        error.textContent = 'Name is required.';
         error.style.display = 'block';
         return;
       }
-      if (!meaning) {
-        error.textContent = 'Meaning is required.';
+      if (categories.some(cat => cat.name.toLowerCase() === name.toLowerCase())) {
+        error.textContent = 'Category already exists.';
         error.style.display = 'block';
         return;
       }
-      if (categories.some(cat => cat.name.toLowerCase() === word.toLowerCase())) {
-        error.textContent = 'Word already exists.';
-        error.style.display = 'block';
-        return;
-      }
-      categories.push({ name: word, description: meaning, topic });
-      localStorage.setItem('categories', JSON.stringify(categories));
+      categories.push({ name, description: desc });
+      localStorage.setItem('categoryList', JSON.stringify(categories));
       bootstrap.Modal.getInstance(document.getElementById('addCategoryModal')).hide();
       renderCategories();
+      renderCategoryFilter && renderCategoryFilter(); // Nếu có hàm filter ở trang khác
     };
 
     // Sửa danh mục
     let editingIdx = null;
     function openEditModal(idx) {
-      const categories = JSON.parse(localStorage.getItem('categories') || '[]');
+      const categories = JSON.parse(localStorage.getItem('categoryList') || '[]');
       editingIdx = idx;
       document.getElementById('editCatName').value = categories[idx].name;
       document.getElementById('editCatDesc').value = categories[idx].description || '';
@@ -275,21 +250,22 @@
       const name = document.getElementById('editCatName').value.trim();
       const desc = document.getElementById('editCatDesc').value.trim();
       const error = document.getElementById('editCatError');
-      let categories = JSON.parse(localStorage.getItem('categories') || '[]');
+      let categories = JSON.parse(localStorage.getItem('categoryList') || '[]');
       if (!name) {
         error.textContent = 'Name is required.';
         error.style.display = 'block';
         return;
       }
       if (categories.some((cat, idx) => cat.name.toLowerCase() === name.toLowerCase() && idx !== editingIdx)) {
-        error.textContent = 'Category name already exists.';
+        error.textContent = 'Category already exists.';
         error.style.display = 'block';
         return;
       }
       categories[editingIdx] = { name, description: desc };
-      localStorage.setItem('categories', JSON.stringify(categories));
+      localStorage.setItem('categoryList', JSON.stringify(categories));
       bootstrap.Modal.getInstance(document.getElementById('editCategoryModal')).hide();
       renderCategories();
+      renderCategoryFilter && renderCategoryFilter();
     };
 
     // Xóa danh mục
@@ -300,11 +276,12 @@
       modal.show();
     }
     document.getElementById('confirmDeleteBtn').onclick = function() {
-      let categories = JSON.parse(localStorage.getItem('categories') || '[]');
+      let categories = JSON.parse(localStorage.getItem('categoryList') || '[]');
       categories.splice(deletingIdx, 1);
-      localStorage.setItem('categories', JSON.stringify(categories));
+      localStorage.setItem('categoryList', JSON.stringify(categories));
       bootstrap.Modal.getInstance(document.getElementById('deleteCategoryModal')).hide();
       renderCategories();
+      renderCategoryFilter && renderCategoryFilter();
     };
   </script>
 </body>
