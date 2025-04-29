@@ -5,31 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vocabulary Words - VocabApp</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-  <nav class="navbar navbar-expand-lg" style="background: #fff;">
-    <div class="container-fluid px-2">
-      <a class="navbar-brand" href="/index.html">VocabApp</a>
-      <ul class="navbar-nav flex-row" id="mainMenu">
-        <li class="nav-item">
-          <a class="nav-link" href="/categories.html">Categories</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/vocabulary.html">Vocabulary</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/flashcards.html">Flashcards</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/quiz.html">Quiz</a>
-        </li>
-      </ul>
-      <div class="ms-auto d-flex align-items-center">
-        <span id="userNameDisplay" style="display:none; margin-right: 16px; font-weight:500;"></span>
-        <button id="logoutBtn" class="btn btn-danger btn-sm" style="display:none;">Logout</button>
-      </div>
-    </div>
-  </nav>
   <style>
     body {
       background: #e9edf1;
@@ -151,12 +126,10 @@
     }
     .navbar-nav .nav-link.active {
       color: #1976d2 !important;
-      font-weight: 600;
+      font-weight: 700;
     }
     .navbar-nav .nav-link:hover {
       color: #1976d2 !important;
-      background: none;
-      text-decoration: none;
     }
     #categoryFilter option[value=""] {
       background: #EFEFEF;
@@ -164,17 +137,39 @@
       font-weight: 700;
     }
   </style>
-  <script>
-    // Đặt active cho menu theo trang hiện tại
-    const menuLinks = document.querySelectorAll('#mainMenu .nav-link');
-    menuLinks.forEach(link => {
-      if (window.location.pathname.endsWith(link.getAttribute('href').replace('/', ''))) {
-        link.classList.add('active');
-      } else {
-        link.classList.remove('active');
-      }
-    });
-  </script>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg" style="background: #fff;">
+    <div class="container-fluid px-2">
+      <a class="navbar-brand" href="./index.html">VocabApp</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav flex-row" id="mainMenu">
+          <li class="nav-item">
+            <a class="nav-link" href="./admin/dashboard.html">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./categories.html">Categories</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="./vocabulary.html">Vocabulary</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./flashcards.html">Flashcards</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./quiz.html">Quiz</a>
+          </li>
+        </ul>
+        <div class="ms-auto d-flex align-items-center">
+          <span id="userNameDisplay" style="display:none; margin-right: 16px; font-weight:500;"></span>
+          <button id="logoutBtn" class="btn btn-danger btn-sm" style="display:none;">Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
 
   <div class="categories-container">
     <div class="categories-header">
@@ -296,6 +291,44 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // Xử lý active menu
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuLinks = document.querySelectorAll('#mainMenu .nav-link');
+      
+      // Xử lý click vào menu
+      menuLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          // Xóa active từ tất cả các menu
+          menuLinks.forEach(l => l.classList.remove('active'));
+          // Thêm active cho menu được click
+          this.classList.add('active');
+          // Lưu trạng thái active vào localStorage
+          localStorage.setItem('activeMenu', this.getAttribute('href'));
+        });
+      });
+
+      // Khôi phục trạng thái active từ localStorage nếu có
+      const activeMenu = localStorage.getItem('activeMenu');
+      if (activeMenu) {
+        menuLinks.forEach(link => {
+          if (link.getAttribute('href') === activeMenu) {
+            link.classList.add('active');
+          } else {
+            link.classList.remove('active');
+          }
+        });
+      } else {
+        // Nếu không có trạng thái lưu, set active cho menu của trang hiện tại
+        const currentPath = window.location.pathname;
+        menuLinks.forEach(link => {
+          if (currentPath.endsWith(link.getAttribute('href'))) {
+            link.classList.add('active');
+            localStorage.setItem('activeMenu', link.getAttribute('href'));
+          }
+        });
+      }
+    });
+
     // Kiểm tra đăng nhập
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     if (!currentUser || !currentUser.firstName || !currentUser.lastName) {

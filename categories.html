@@ -33,16 +33,27 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container-fluid px-2">
-      <a class="navbar-brand fw-bold" href="/index.html">VocabApp</a>
+      <a class="navbar-brand fw-bold" href="./index.html">VocabApp</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link active" href="/categories.html">Categories</a></li>
-          <li class="nav-item"><a class="nav-link" href="/vocabulary.html">Vocabulary</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Flashcards</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Quiz</a></li>
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0" id="mainMenu">
+          <li class="nav-item">
+            <a class="nav-link" href="./admin/dashboard.html">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./categories.html">Categories</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./vocabulary.html">Vocabulary</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./flashcards.html">Flashcards</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./quiz.html">Quiz</a>
+          </li>
         </ul>
       </div>
     </div>
@@ -66,6 +77,10 @@
         <!-- Danh mục sẽ được render ở đây -->
       </tbody>
     </table>
+    <!-- Thêm phân trang -->
+    <nav>
+      <ul class="pagination justify-content-center" id="pagination"></ul>
+    </nav>
   </div>
 
   <!-- Modal Thêm mới danh mục -->
@@ -151,25 +166,35 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Kiểm tra đăng nhập
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser || !currentUser.firstName || !currentUser.lastName) {
-      window.location.href = 'admin/authen/login.html';
-    }
-
-    // Hiển thị danh sách danh mục từ localStorage với filter
+    // Thêm biến cho phân trang
+    let currentPage = 1;
+    const itemsPerPage = 3;
     let searchKeyword = '';
+
+    // Hiển thị danh sách danh mục từ localStorage với filter và phân trang
     function renderCategories() {
       const categories = JSON.parse(localStorage.getItem('categoryList') || '[]');
       const tbody = document.querySelector('.categories-table tbody');
       tbody.innerHTML = '';
+
       // Lọc theo từ khóa
-      const filtered = categories.filter(cat => cat.name.toLowerCase().includes(searchKeyword.toLowerCase()));
-      if (filtered.length === 0) {
+      const filtered = categories.filter(cat => 
+        cat.name.toLowerCase().includes(searchKeyword.toLowerCase())
+      );
+
+      // Tính toán phân trang
+      const totalPages = Math.ceil(filtered.length / itemsPerPage) || 1;
+      if (currentPage > totalPages) currentPage = totalPages;
+      const startIdx = (currentPage - 1) * itemsPerPage;
+      const endIdx = startIdx + itemsPerPage;
+      const pageItems = filtered.slice(startIdx, endIdx);
+
+      if (pageItems.length === 0) {
         tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">No categories found.</td></tr>`;
         return;
       }
-      filtered.forEach((cat, idx) => {
+
+      pageItems.forEach((cat, idx) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td class="word-col">${cat.name}</td>
@@ -181,6 +206,7 @@
         `;
         tbody.appendChild(tr);
       });
+
       // Gán sự kiện Edit/Delete
       document.querySelectorAll('.edit-link').forEach(link => {
         link.onclick = function(e) {
@@ -196,12 +222,63 @@
           openDeleteModal(idx);
         };
       });
+
+      // Render phân trang
+      renderPagination(totalPages);
     }
+
+    // Hàm render phân trang
+    function renderPagination(totalPages) {
+      const pagination = document.getElementById('pagination');
+      pagination.innerHTML = '';
+      if (totalPages <= 1) return;
+
+      // Nút Previous
+      const prevLi = document.createElement('li');
+      prevLi.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
+      prevLi.innerHTML = `<a class="page-link" href="#">Previous</a>`;
+      prevLi.onclick = function(e) {
+        e.preventDefault();
+        if (currentPage > 1) {
+          currentPage--;
+          renderCategories();
+        }
+      };
+      pagination.appendChild(prevLi);
+
+      // Các nút số trang
+      for (let i = 1; i <= totalPages; i++) {
+        const li = document.createElement('li');
+        li.className = 'page-item' + (i === currentPage ? ' active' : '');
+        li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+        li.onclick = function(e) {
+          e.preventDefault();
+          currentPage = i;
+          renderCategories();
+        };
+        pagination.appendChild(li);
+      }
+
+      // Nút Next
+      const nextLi = document.createElement('li');
+      nextLi.className = 'page-item' + (currentPage === totalPages ? ' disabled' : '');
+      nextLi.innerHTML = `<a class="page-link" href="#">Next</a>`;
+      nextLi.onclick = function(e) {
+        e.preventDefault();
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderCategories();
+        }
+      };
+      pagination.appendChild(nextLi);
+    }
+
+    // Cập nhật sự kiện search để reset về trang 1
     document.querySelector('.search-bar').addEventListener('input', function() {
       searchKeyword = this.value;
+      currentPage = 1;  // Reset về trang 1 khi search
       renderCategories();
     });
-    renderCategories();
 
     // Modal thêm mới danh mục
     document.querySelector('.btn-add-category').onclick = function() {
@@ -230,8 +307,8 @@
       categories.push({ name, description: desc });
       localStorage.setItem('categoryList', JSON.stringify(categories));
       bootstrap.Modal.getInstance(document.getElementById('addCategoryModal')).hide();
+      currentPage = 1;  // Reset về trang 1 sau khi thêm
       renderCategories();
-      renderCategoryFilter && renderCategoryFilter(); // Nếu có hàm filter ở trang khác
     };
 
     // Sửa danh mục
@@ -265,7 +342,6 @@
       localStorage.setItem('categoryList', JSON.stringify(categories));
       bootstrap.Modal.getInstance(document.getElementById('editCategoryModal')).hide();
       renderCategories();
-      renderCategoryFilter && renderCategoryFilter();
     };
 
     // Xóa danh mục
@@ -280,9 +356,50 @@
       categories.splice(deletingIdx, 1);
       localStorage.setItem('categoryList', JSON.stringify(categories));
       bootstrap.Modal.getInstance(document.getElementById('deleteCategoryModal')).hide();
+      currentPage = 1;  // Reset về trang 1 sau khi xóa
       renderCategories();
-      renderCategoryFilter && renderCategoryFilter();
     };
+
+    // Khởi tạo ban đầu
+    renderCategories();
+
+    // Xử lý active menu
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuLinks = document.querySelectorAll('#mainMenu .nav-link');
+      
+      // Xử lý click vào menu
+      menuLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          // Xóa active từ tất cả các menu
+          menuLinks.forEach(l => l.classList.remove('active'));
+          // Thêm active cho menu được click
+          this.classList.add('active');
+          // Lưu trạng thái active vào localStorage
+          localStorage.setItem('activeMenu', this.getAttribute('href'));
+        });
+      });
+
+      // Khôi phục trạng thái active từ localStorage nếu có
+      const activeMenu = localStorage.getItem('activeMenu');
+      if (activeMenu) {
+        menuLinks.forEach(link => {
+          if (link.getAttribute('href') === activeMenu) {
+            link.classList.add('active');
+          } else {
+            link.classList.remove('active');
+          }
+        });
+      } else {
+        // Nếu không có trạng thái lưu, set active cho menu của trang hiện tại
+        const currentPath = window.location.pathname;
+        menuLinks.forEach(link => {
+          if (currentPath.endsWith(link.getAttribute('href'))) {
+            link.classList.add('active');
+            localStorage.setItem('activeMenu', link.getAttribute('href'));
+          }
+        });
+      }
+    });
   </script>
 </body>
 </html> 

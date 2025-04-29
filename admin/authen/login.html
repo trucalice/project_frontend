@@ -5,59 +5,125 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VocabApp - Login</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="./authen.css">
+    <style>
+        body {
+            background-color: #e4e4e4;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .navbar {
+            background: white;
+            padding: 15px 20px;
+            box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+            z-index: 1000;
+        }
+        .navbar-brand {
+            color: #333;
+            font-weight: 500;
+            font-size: 1.2rem;
+            text-decoration: none;
+        }
+        .auth-buttons {
+            margin-left: auto;
+        }
+        .auth-buttons .btn {
+            margin-left: 10px;
+            padding: 6px 20px;
+        }
+        .content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: translateY(-80px);
+        }
+        .login-card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .login-card h3 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+        .form-control {
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #f0eded;
+            border-radius: 4px;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: #0d6efd;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+        .footer {
+            text-align: center;
+            padding: 15px;
+            color: #6c757d;
+            background: rgb(241, 241, 241);
+            border-top: 1px solid #eae4e4;
+            box-shadow: rgba(0, 0, 0, 0.1) 0px -4px 12px;
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/index.html">VocabApp</a>
-            <div class="auth-links">
-                <a href="/admin/authen/login.html" class="btn btn-primary">Login</a>
-                <a href="/admin/authen/register.html" class="btn btn-success">Register</a>
+    <div class="wrapper">
+        <nav class="navbar">
+            <a class="navbar-brand" href="../../index.html">VocabApp</a>
+            <div class="auth-buttons">
+                <a href="./login.html" class="btn btn-primary">Login</a>
+                <a href="./register.html" class="btn btn-success">Register</a>
             </div>
-        </div>
-    </nav>
+        </nav>
 
-    <div class="page-container">
-        <div class="main-content">
+        <div class="content">
             <div class="login-card">
-                <h3 class="text-center mb-4">Login</h3>
+                <h3>Login</h3>
                 <form id="loginForm">
                     <input type="email" id="email" class="form-control" placeholder="Email" required />
                     <input type="password" id="password" class="form-control" placeholder="Password" required />
-                    <button type="submit" class="btn btn-primary w-100 btn-login">Login</button>
+                    <button type="submit" class="btn btn-login">Login</button>
                 </form>
-                <div id="alertBox" class="alert mt-3 d-none"></div>
             </div>
         </div>
-        <div class="footer-wrapper">
-            <footer class="footer">
-                <p>&copy; 2024 VocabApp. All rights reserved.</p>
-            </footer>
-        </div>
+
+        <footer class="footer">
+            <p class="mb-0">&copy; 2024 VocabApp. All rights reserved.</p>
+        </footer>
     </div>
 
-    <script src="authen.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-      document.getElementById('loginForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        // Lấy danh sách người dùng từ localStorage
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        const user = users.find(u => u.email === email && u.password === password);
-        const alertBox = document.getElementById('alertBox');
-        if (user) {
-          // Lưu thông tin đăng nhập (ví dụ: tên người dùng)
-          localStorage.setItem('currentUser', JSON.stringify(user));
-          // Chuyển hướng sang trang giao diện người dùng
-          window.location.href = '../../index.html';
-        } else {
-          alertBox.className = 'alert alert-danger mt-3';
-          alertBox.textContent = 'Email hoặc mật khẩu không đúng.';
-          alertBox.classList.remove('d-none');
-        }
-      });
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Lấy danh sách người dùng từ localStorage
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const user = users.find(u => u.email === email && u.password === password);
+            
+            if (user) {
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                window.location.href = '../../index.html';
+            }
+        });
     </script>
 </body>
 </html> 
