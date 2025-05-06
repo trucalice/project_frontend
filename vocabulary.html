@@ -154,7 +154,7 @@
             <a class="nav-link" href="./categories.html">Categories</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" href="./vocabulary.html">Vocabulary</a>
+            <a class="nav-link" href="./vocabulary.html">Vocabulary</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="./flashcards.html">Flashcards</a>
@@ -290,50 +290,21 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="./auth.js"></script>
   <script>
     // Xử lý active menu
     document.addEventListener('DOMContentLoaded', function() {
       const menuLinks = document.querySelectorAll('#mainMenu .nav-link');
-      
-      // Xử lý click vào menu
+      const currentPath = window.location.pathname.split('/').pop();
       menuLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-          // Xóa active từ tất cả các menu
-          menuLinks.forEach(l => l.classList.remove('active'));
-          // Thêm active cho menu được click
-          this.classList.add('active');
-          // Lưu trạng thái active vào localStorage
-          localStorage.setItem('activeMenu', this.getAttribute('href'));
-        });
+        const linkPath = link.getAttribute('href').split('/').pop();
+        if (currentPath === linkPath) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
       });
-
-      // Khôi phục trạng thái active từ localStorage nếu có
-      const activeMenu = localStorage.getItem('activeMenu');
-      if (activeMenu) {
-        menuLinks.forEach(link => {
-          if (link.getAttribute('href') === activeMenu) {
-            link.classList.add('active');
-          } else {
-            link.classList.remove('active');
-          }
-        });
-      } else {
-        // Nếu không có trạng thái lưu, set active cho menu của trang hiện tại
-        const currentPath = window.location.pathname;
-        menuLinks.forEach(link => {
-          if (currentPath.endsWith(link.getAttribute('href'))) {
-            link.classList.add('active');
-            localStorage.setItem('activeMenu', link.getAttribute('href'));
-          }
-        });
-      }
     });
-
-    // Kiểm tra đăng nhập
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser || !currentUser.firstName || !currentUser.lastName) {
-      window.location.href = 'admin/authen/login.html';
-    }
 
     // Hiển thị danh sách từ vựng từ localStorage với filter
     let searchKeyword = '';
@@ -371,10 +342,15 @@
       );
       // Phân trang
       const totalPages = Math.ceil(filtered.length / itemsPerPage) || 1;
+      
+      // Đảm bảo currentPage luôn hợp lệ
+      if (currentPage < 1) currentPage = 1;
       if (currentPage > totalPages) currentPage = totalPages;
+      
       const startIdx = (currentPage - 1) * itemsPerPage;
       const endIdx = startIdx + itemsPerPage;
       const pageItems = filtered.slice(startIdx, endIdx);
+      
       if (pageItems.length === 0) {
         tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No vocabulary found.</td></tr>`;
       } else {
@@ -413,6 +389,7 @@
       const pagination = document.getElementById('pagination');
       pagination.innerHTML = '';
       if (totalPages <= 1) return;
+      
       // Previous
       const prevLi = document.createElement('li');
       prevLi.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
@@ -425,8 +402,37 @@
         }
       };
       pagination.appendChild(prevLi);
+      
       // Số trang
-      for (let i = 1; i <= totalPages; i++) {
+      const maxVisiblePages = 5;
+      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+      let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+      
+      if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+      }
+      
+      // First page
+      if (startPage > 1) {
+        const firstLi = document.createElement('li');
+        firstLi.className = 'page-item';
+        firstLi.innerHTML = `<a class="page-link" href="#">1</a>`;
+        firstLi.onclick = function(e) {
+          e.preventDefault();
+          currentPage = 1;
+          renderCategories();
+        };
+        pagination.appendChild(firstLi);
+        
+        if (startPage > 2) {
+          const ellipsisLi = document.createElement('li');
+          ellipsisLi.className = 'page-item disabled';
+          ellipsisLi.innerHTML = `<span class="page-link">...</span>`;
+          pagination.appendChild(ellipsisLi);
+        }
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
         const li = document.createElement('li');
         li.className = 'page-item' + (i === currentPage ? ' active' : '');
         li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
@@ -437,6 +443,27 @@
         };
         pagination.appendChild(li);
       }
+      
+      // Last page
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+          const ellipsisLi = document.createElement('li');
+          ellipsisLi.className = 'page-item disabled';
+          ellipsisLi.innerHTML = `<span class="page-link">...</span>`;
+          pagination.appendChild(ellipsisLi);
+        }
+        
+        const lastLi = document.createElement('li');
+        lastLi.className = 'page-item';
+        lastLi.innerHTML = `<a class="page-link" href="#">${totalPages}</a>`;
+        lastLi.onclick = function(e) {
+          e.preventDefault();
+          currentPage = totalPages;
+          renderCategories();
+        };
+        pagination.appendChild(lastLi);
+      }
+      
       // Next
       const nextLi = document.createElement('li');
       nextLi.className = 'page-item' + (currentPage === totalPages ? ' disabled' : '');

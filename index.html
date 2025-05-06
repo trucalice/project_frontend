@@ -135,24 +135,24 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="./auth.js"></script>
   <script>
     // Kiểm tra người dùng đã đăng nhập chưa
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     if (currentUser && currentUser.firstName && currentUser.lastName) {
-      // Hiển thị tên người dùng và nút logout
-      document.getElementById('userNameDisplay').style.display = 'inline';
-      document.getElementById('logoutBtn').style.display = 'inline-block';
-      document.getElementById('userNameDisplay').textContent = `Hi, ${currentUser.firstName} ${currentUser.lastName}`;
-      document.getElementById('logoutBtn').onclick = function() {
-        localStorage.removeItem('currentUser');
-        window.location.reload();
-      };
       // Hiển thị giao diện chào mừng
       document.getElementById('welcomeBox').innerHTML = `
         <h2>Chào mừng bạn đã quay lại học, <span style='font-weight:700'>${currentUser.firstName} ${currentUser.lastName}</span>!</h2>
         <p>Tiếp tục học từ vựng và cải thiện kỹ năng của bạn ngay hôm nay.</p>
-        <button class='btn btn-quiz'>Làm Quiz</button>
+        <div class="d-flex justify-content-center gap-3 mt-4">
+          <a href="quiz.html" class="btn btn-quiz" id="goToQuizBtn">Làm Quiz</a>
+          <a href="flashcards.html" class="btn btn-quiz" id="goToFlashcardsBtn">Làm Flashcards</a>
+        </div>
       `;
+      // Gán sự kiện click cho nút vừa tạo
+      document.getElementById('goToQuizBtn').onclick = function() {
+        window.location.href = 'quiz.html';
+      };
     }
 
     function getAllCategories() {

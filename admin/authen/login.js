@@ -1,38 +1,41 @@
-document.getElementById("loginForm").addEventListener("submit", function(e) {
+// Kiểm tra trạng thái đăng nhập khi trang được tải
+window.addEventListener('load', function() {
+    const currentUser = localStorage.getItem('currentUser');
+    if (currentUser) {
+        window.location.href = '../../index.html';
+    }
+});
+
+document.getElementById('loginForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
-    
-    // Get users from localStorage
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-    
-    // Check if there are any users
-    if (users.length === 0) {
-        showAlert("Không tìm thấy tài khoản nào. Vui lòng đăng ký trước.", "danger");
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const emailError = document.getElementById('emailError');
+    const passwordError = document.getElementById('passwordError');
+
+    // Ẩn các thông báo lỗi
+    emailError.style.display = 'none';
+    passwordError.style.display = 'none';
+
+    // Kiểm tra và hiển thị thông báo lỗi
+    if (!email) {
+        emailError.style.display = 'block';
         return;
     }
-    
-    // Find user
+
+    if (!password) {
+        passwordError.style.display = 'block';
+        return;
+    }
+
+    // Nếu đã nhập đủ thông tin thì tiếp tục xử lý đăng nhập
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
     const user = users.find(u => u.email === email && u.password === password);
     
     if (user) {
-        // Store logged in user info
-        localStorage.setItem("currentUser", JSON.stringify({
-            id: user.id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email
-        }));
-        
-        showAlert("Đăng nhập thành công!", "success");
-        
-        // Redirect to dashboard after 1 second
-        setTimeout(() => {
-            window.location.href = "../../admin/dashboard.html";
-        }, 1000);
-    } else {
-        showAlert("Email hoặc mật khẩu không đúng", "danger");
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        window.location.href = '../../index.html';
     }
 });
 

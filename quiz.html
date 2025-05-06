@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vocabulary Quiz - VocabApp</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { 
+    background: #f5f7fa; 
+    min-height: 100vh; 
+    }
+    .navbar { background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.07); }
+    .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .quiz-title { font-size: 2rem; font-weight: 700; color: #222; text-align: left; margin-bottom: 0; }
+    .btn-quiz { min-width: 120px; margin: 0 8px; border-radius: 8px; font-weight: 500; font-size: 1.08rem; }
+    .btn-start-quiz { background: #22c55e; color: #fff; border: none; }
+    .btn-start-quiz:hover { background: #0edb4f; color: #fff; }
+    .progress { height: 18px; margin-bottom: 16px; border-radius: 8px; background: #e5e7eb; }
+    .question { font-size: 1.2rem; font-weight: 600; margin-bottom: 18px; text-align: left; }
+    .option-btn { margin-bottom: 10px; width: 100%; text-align: left; border-radius: 8px; font-size: 1.08rem; }
+    .option-btn.selected { background: #1976d2; color: #fff; }
+    .option-btn.correct { background: #22c55e; color: #fff; }
+    .option-btn.incorrect { background: #e74c3c; color: #fff; }
+    .quiz-result { font-size: 1.2rem; font-weight: 600; margin: 24px 0; }
+    .footer { background: #fff; margin-top: 48px; padding: 12px 0; box-shadow: 0 -4px 16px rgba(0,0,0,0.10), 0 -2px 6px rgba(0,0,0,0.06); position: fixed; left: 0; bottom: 0; width: 100%; z-index: 100; }
+    .quiz-history-table {
+      width: 100%;
+      table-layout: fixed;
+    }
+    .quiz-history-table th, .quiz-history-table td {
+      text-align: left;
+      padding-left: 24px;
+      padding-right: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .quiz-history-table th:nth-child(1),
+    .quiz-history-table td:nth-child(1) {
+      width: 35%;
+    }
+    .quiz-history-table th:nth-child(2),
+    .quiz-history-table td:nth-child(2) {
+      width: 40%;
+    }
+    .quiz-history-table th:nth-child(3),
+    .quiz-history-table td:nth-child(3) {
+      width: 25%;
+    }
+    @media (max-width: 700px) {
+      .quiz-container { padding: 18px 6px; }
+      .quiz-title { font-size: 1.3rem; }
+    }
+    .nav-link.active {
+    color: rgb(48, 29, 220) !important;
+    font-weight: 600 !important;
+  }
+  .quiz-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    padding: 32px 24px;
+    margin-bottom: 24px;
+  }
+  .quiz-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 18px;
+  }
+  .option-btn {
+    padding: 16px 18px;
+    font-size: 1.12rem;
+  }
+  #quizBox .d-flex {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container-fluid px-2">
+      <a class="navbar-brand fw-bold" href="./index.html">VocabApp</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0" id="mainMenu">
+          <li class="nav-item">
+            <a class="nav-link" href="./index.html">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./categories.html">Categories</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./vocabulary.html">Vocabulary</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./flashcards.html">Flashcards</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./quiz.html">Quiz</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="quiz-container mt-4">
+    <div id="quizStartBox">
+      <div class="quiz-header">
+        <span class="quiz-title">Vocabulary Quiz</span>
+        <button class="btn btn-start-quiz btn-quiz mb-0" id="startQuizBtn">Start Quiz</button>
+      </div>
+      <select class="form-select mb-3" id="quizCategoryFilter">
+        <option value="">All Categories</option>
+      </select>
+    </div>
+    <div class="progress mb-3">
+      <div id="quizProgressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%">0/0</div>
+    </div>
+    <div id="quizBox" style="display:none;">
+      <div class="question" id="quizQuestion"></div>
+      <div id="quizOptions"></div>
+      <div class="d-flex justify-content-between mt-3 w-100">
+        <button class="btn btn-primary btn-quiz" id="prevQuizBtn">Previous</button>
+        <button class="btn btn-primary btn-quiz" id="nextQuizBtn">Next</button>
+      </div>
+    </div>
+    <div id="quizResultBox" style="display:none;">
+      <div class="quiz-result" id="quizResult"></div>
+      <button class="btn btn-primary btn-quiz" id="tryAgainBtn">Try Again</button>
+    </div>
+  </div>
+
+  <div class="container mt-5">
+    <h5 class="mt-4 mb-2" style="text-align:left;">Quiz History</h5>
+    <table class="table quiz-history-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Category</th>
+          <th>Score</th>
+        </tr>
+      </thead>
+      <tbody id="quizHistoryTable">
+        <!-- Quiz history will be rendered here -->
+      </tbody>
+    </table>
+  </div>
+
+  <footer class="footer text-center">
+    <p class="mb-0 text-muted">&copy; 2024 VocabApp. All rights reserved.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Menu active logic
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuLinks = document.querySelectorAll('#mainMenu .nav-link');
+      const currentPath = window.location.pathname.split('/').pop();
+      menuLinks.forEach(link => {
+        const linkPath = link.getAttribute('href').split('/').pop();
+        if (currentPath === linkPath) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
+    });
+
+    // Quiz logic
+    let allWords = JSON.parse(localStorage.getItem('categories') || '[]');
+    let quizWords = [];
+    let quizCategory = '';
+    let quizCurrent = 0;
+    let quizAnswers = [];
+    let quizStarted = false;
+    let quizScore = 0;
+    let quizHistory = JSON.parse(localStorage.getItem('quizHistory') || '[]');
+    let quizOptionsOrder = [];
+
+    function getAllCategories() {
+      const categories = JSON.parse(localStorage.getItem('categoryList') || '[]');
+      return categories.map(cat => cat.name);
+    }
+    function renderQuizCategoryFilter() {
+      const select = document.getElementById('quizCategoryFilter');
+      select.innerHTML = '<option value="">All Categories</option>';
+      getAllCategories().forEach(topic => {
+        const option = document.createElement('option');
+        option.value = topic;
+        option.textContent = topic;
+        select.appendChild(option);
+      });
+    }
+
+    function startQuiz() {
+      quizCategory = document.getElementById('quizCategoryFilter').value;
+      if (!quizCategory) {
+        quizWords = allWords.slice();
+      } else {
+        quizWords = allWords.filter(word => word.topic === quizCategory);
+      }
+      if (quizWords.length === 0) {
+        alert('No words available for this category!');
+        return;
+      }
+      quizCurrent = 0;
+      quizAnswers = Array(quizWords.length).fill(null);
+      quizScore = 0;
+      quizStarted = true;
+      document.getElementById('quizStartBox').style.display = 'none';
+      document.getElementById('quizBox').style.display = '';
+      document.getElementById('quizResultBox').style.display = 'none';
+      quizOptionsOrder = [];
+      for (let i = 0; i < quizWords.length; i++) {
+        let options = [quizWords[i].description];
+        let wrongs = allWords.filter(w => w.name !== quizWords[i].name).map(w => w.description);
+        while (options.length < 4 && wrongs.length) {
+          const idx = Math.floor(Math.random() * wrongs.length);
+          options.push(wrongs[idx]);
+          wrongs.splice(idx, 1);
+        }
+        // Trộn đáp án và lưu lại thứ tự
+        options = options.sort(() => Math.random() - 0.5);
+        quizOptionsOrder.push(options);
+      }
+      renderQuiz();
+    }
+
+    function renderQuiz() {
+      if (!quizWords.length) return;
+      const word = quizWords[quizCurrent];
+      document.getElementById('quizQuestion').textContent = `What is the meaning of "${word.name}"?`;
+      // Lấy thứ tự đáp án đã random
+      let options = quizOptionsOrder[quizCurrent];
+      const optionsDiv = document.getElementById('quizOptions');
+      optionsDiv.innerHTML = '';
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-outline-secondary option-btn';
+        btn.textContent = opt;
+        if (quizAnswers[quizCurrent] !== null) {
+          if (opt === word.description) {
+            btn.classList.add('correct');
+          }
+          if (opt === quizAnswers[quizCurrent] && opt !== word.description) {
+            btn.classList.add('incorrect');
+          }
+        }
+        btn.onclick = function() {
+          if (quizAnswers[quizCurrent] !== null) return;
+          quizAnswers[quizCurrent] = opt;
+          if (opt === word.description) quizScore++;
+          renderQuiz();
+        };
+        optionsDiv.appendChild(btn);
+      });
+      // Progress
+      document.getElementById('quizProgressBar').style.width = ((quizCurrent+1)/quizWords.length*100) + '%';
+      document.getElementById('quizProgressBar').textContent = `${quizCurrent+1}/${quizWords.length}`;
+    }
+
+    document.getElementById('startQuizBtn').onclick = startQuiz;
+    document.getElementById('quizCategoryFilter').onchange = function() {
+      // Reset quiz state when changing category
+      document.getElementById('quizStartBox').style.display = '';
+      document.getElementById('quizBox').style.display = 'none';
+      document.getElementById('quizResultBox').style.display = 'none';
+    };
+    document.getElementById('prevQuizBtn').onclick = function() {
+      if (quizCurrent > 0) {
+        quizCurrent--;
+        renderQuiz();
+      }
+    };
+    document.getElementById('nextQuizBtn').onclick = function() {
+      if (quizCurrent < quizWords.length - 1) {
+        quizCurrent++;
+        renderQuiz();
+      } else {
+        // Kết thúc quiz
+        document.getElementById('quizBox').style.display = 'none';
+        document.getElementById('quizResultBox').style.display = '';
+        document.getElementById('quizResult').textContent = `You scored ${quizScore}/${quizWords.length}`;
+        // Lưu lịch sử
+        quizHistory.push({
+          date: new Date().toLocaleString(),
+          category: quizCategory || 'All',
+          score: `${quizScore}/${quizWords.length}`
+        });
+        localStorage.setItem('quizHistory', JSON.stringify(quizHistory));
+        renderQuizHistory();
+      }
+    };
+    document.getElementById('tryAgainBtn').onclick = function() {
+      document.getElementById('quizStartBox').style.display = '';
+      document.getElementById('quizBox').style.display = 'none';
+      document.getElementById('quizResultBox').style.display = 'none';
+    };
+
+    function renderQuizHistory() {
+      const tbody = document.getElementById('quizHistoryTable');
+      tbody.innerHTML = '';
+      if (!quizHistory.length) {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No history</td></tr>';
+        return;
+      }
+      quizHistory.slice().reverse().forEach(his => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${his.date}</td><td>${his.category}</td><td>${his.score}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    renderQuizCategoryFilter();
+    renderQuizHistory();
+
+    document.getElementById('goToQuizBtn').onclick = function() {
+      window.location.href = 'quiz.html';
+    };
+  </script>
+</body>
+</html> 

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flashcard - VocabApp</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { 
+        background: #f5f7fa; 
+        min-height: 100vh; 
+    }
+    .navbar { 
+        background: #fff; 
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.07); 
+    }
+    .flashcard-container { 
+        max-width: 600px; 
+        margin: 48px auto 0 auto; 
+        background: #fff; 
+        border-radius: 12px; 
+        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        padding: 32px 24px; text-align: center; 
+    }
+    .flashcard { 
+        font-size: 2rem; 
+        font-weight: 700; 
+        color: #0a0b0b; 
+        margin-bottom: 16px; 
+        min-height: 48px; 
+    }
+    .flashcard-meaning { 
+        font-size: 1.2rem; 
+        color: #444; 
+        margin-bottom: 24px; 
+        min-height: 32px; 
+    }
+    .btn-flash { 
+        min-width: 120px; 
+        margin: 0 8px; 
+    }
+    .progress { 
+        height: 18px; 
+        margin-bottom: 16px; }
+    .word-list-table { 
+        background: #fff; 
+        border-radius: 8px; 
+        box-shadow: 0 2px 8px rgba(0,0,0,0.07); 
+        margin-top: 32px; 
+    }
+    th, td { 
+        vertical-align: middle !important; 
+    }
+    th { 
+        color: #6B7280 !important; 
+        text-transform: uppercase; 
+        font-size: 0.92rem; 
+        font-weight: 600; 
+        border: none; 
+        letter-spacing: 1px; 
+        padding: 14px 0 14px 32px; 
+        text-align: left; 
+    }
+    .footer { 
+        background: #fff; 
+        margin-top: 48px; 
+        padding: 12px 0; 
+        box-shadow: 0 -2px 6px rgba(0,0,0,0.03); 
+    }
+    .flashcard-flip {
+      perspective: 1000px;
+      width: 350px;
+      height: 180px;
+      margin: 0 auto 24px auto;
+      cursor: pointer;
+    }
+    .flashcard-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s cubic-bezier(.4,2,.6,1);
+      transform-style: preserve-3d;
+    }
+    .flashcard-flip.flipped .flashcard-inner {
+      transform: rotateY(180deg);
+    }
+    .flashcard-front, .flashcard-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 700;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    }
+    .flashcard-back {
+      transform: rotateY(180deg);
+      color: #12181e;
+    }
+    .navbar-nav .nav-link.active {
+      color: #1976d2 !important;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container-fluid px-2">
+      <a class="navbar-brand fw-bold" href="./index.html">VocabApp</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0" id="mainMenu">
+          <li class="nav-item">
+            <a class="nav-link" href="./index.html">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./categories.html">Categories</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./vocabulary.html">Vocabulary</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./flashcards.html">Flashcards</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./quiz.html">Quiz</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <select class="form-select mb-3" id="categoryFilter">
+      <option value="">All Categories</option>
+    </select>
+  </div>
+
+  <div class="flashcard-container mt-4">
+    <div class="progress mb-3">
+      <div id="progressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%">0/0</div>
+    </div>
+    <div class="flashcard-flip" id="flashcardFlip">
+      <div class="flashcard-inner" id="flashcardInner">
+        <div class="flashcard-front" id="flashcardFront">Cat</div>
+        <div class="flashcard-back" id="flashcardBack">mèo</div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-center mb-3">
+      <button class="btn btn-primary btn-flash" id="prevBtn">Previous</button>
+      <button class="btn btn-success btn-flash" id="markBtn">Mark as Learned</button>
+      <button class="btn btn-primary btn-flash" id="nextBtn">Next</button>
+    </div>
+  </div>
+
+  <div class="container mt-5">
+    <h5>Word List</h5>
+    <table class="table word-list-table">
+      <thead>
+        <tr>
+          <th>Word</th>
+          <th>Meaning</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="wordListTable">
+        <!-- Word list will be rendered here -->
+      </tbody>
+    </table>
+  </div>
+
+  <nav>
+    <ul class="pagination justify-content-center" id="pagination"></ul>
+  </nav>
+
+  <footer class="footer text-center">
+    <p class="mb-0 text-muted">&copy; 2024 VocabApp. All rights reserved.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Menu active logic
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuLinks = document.querySelectorAll('#mainMenu .nav-link');
+      const currentPath = window.location.pathname.split('/').pop();
+      menuLinks.forEach(link => {
+        const linkPath = link.getAttribute('href').split('/').pop();
+        if (currentPath === linkPath) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
+    });
+
+    // Flashcard logic
+    let words = JSON.parse(localStorage.getItem('categories') || '[]');
+    let currentIdx = 0;
+    let learned = JSON.parse(localStorage.getItem('flashcardLearned') || '[]');
+    let isFlipped = false;
+    let selectedCategory = '';
+    let currentPage = 1;
+    const itemsPerPage = 3;
+
+    function renderFlashcard() {
+      if (!words.length) {
+        document.getElementById('flashcardFront').textContent = 'No words';
+        document.getElementById('flashcardBack').textContent = '';
+        document.getElementById('progressBar').style.width = '0%';
+        document.getElementById('progressBar').textContent = '0/0';
+        return;
+      }
+      const word = words[currentIdx];
+      document.getElementById('flashcardFront').textContent = word.name;
+      document.getElementById('flashcardBack').textContent = word.description || '';
+      document.getElementById('progressBar').style.width = ((currentIdx+1)/words.length*100) + '%';
+      document.getElementById('progressBar').textContent = `${currentIdx+1}/${words.length}`;
+      // Reset flip state
+      document.getElementById('flashcardFlip').classList.remove('flipped');
+      isFlipped = false;
+    }
+
+    function renderWordList() {
+      const tbody = document.getElementById('wordListTable');
+      tbody.innerHTML = '';
+      if (!words.length) {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No words</td></tr>';
+        document.getElementById('pagination').innerHTML = '';
+        return;
+      }
+      // Phân trang
+      const totalPages = Math.ceil(words.length / itemsPerPage) || 1;
+      if (currentPage > totalPages) currentPage = totalPages;
+      const startIdx = (currentPage - 1) * itemsPerPage;
+      const endIdx = startIdx + itemsPerPage;
+      const pageItems = words.slice(startIdx, endIdx);
+
+      pageItems.forEach(word => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${word.name}</td><td>${word.description || ''}</td><td>${learned.includes(word.name) ? 'Learned' : ''}</td>`;
+        tbody.appendChild(tr);
+      });
+
+      renderPagination(totalPages);
+    }
+
+    function renderPagination(totalPages) {
+      const pagination = document.getElementById('pagination');
+      pagination.innerHTML = '';
+      if (totalPages <= 1) return;
+
+      // Previous
+      const prevLi = document.createElement('li');
+      prevLi.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
+      prevLi.innerHTML = `<a class="page-link" href="#">Previous</a>`;
+      prevLi.onclick = function(e) {
+        e.preventDefault();
+        if (currentPage > 1) {
+          currentPage--;
+          renderWordList();
+        }
+      };
+      pagination.appendChild(prevLi);
+
+      // Số trang
+      for (let i = 1; i <= totalPages; i++) {
+        const li = document.createElement('li');
+        li.className = 'page-item' + (i === currentPage ? ' active' : '');
+        li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+        li.onclick = function(e) {
+          e.preventDefault();
+          currentPage = i;
+          renderWordList();
+        };
+        pagination.appendChild(li);
+      }
+
+      // Next
+      const nextLi = document.createElement('li');
+      nextLi.className = 'page-item' + (currentPage === totalPages ? ' disabled' : '');
+      nextLi.innerHTML = `<a class="page-link" href="#">Next</a>`;
+      nextLi.onclick = function(e) {
+        e.preventDefault();
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderWordList();
+        }
+      };
+      pagination.appendChild(nextLi);
+    }
+
+    document.getElementById('prevBtn').onclick = function() {
+      if (!words.length) return;
+      currentIdx = (currentIdx - 1 + words.length) % words.length;
+      renderFlashcard();
+    };
+    document.getElementById('nextBtn').onclick = function() {
+      if (!words.length) return;
+      currentIdx = (currentIdx + 1) % words.length;
+      renderFlashcard();
+    };
+    document.getElementById('markBtn').onclick = function() {
+      if (!words.length) return;
+      const word = words[currentIdx];
+      if (!learned.includes(word.name)) {
+        learned.push(word.name);
+        localStorage.setItem('flashcardLearned', JSON.stringify(learned));
+        renderWordList();
+      }
+    };
+
+    document.getElementById('flashcardFlip').onclick = function() {
+      isFlipped = !isFlipped;
+      this.classList.toggle('flipped', isFlipped);
+    };
+
+    // Initial render
+    renderFlashcard();
+    renderWordList();
+
+    function getAllCategories() {
+      const categories = JSON.parse(localStorage.getItem('categoryList') || '[]');
+      return categories.map(cat => cat.name);
+    }
+    function renderCategoryFilter() {
+      const select = document.getElementById('categoryFilter');
+      select.innerHTML = '<option value="">All Categories</option>';
+      getAllCategories().forEach(topic => {
+        const option = document.createElement('option');
+        option.value = topic;
+        option.textContent = topic;
+        select.appendChild(option);
+      });
+    }
+
+    document.getElementById('categoryFilter').addEventListener('change', function() {
+      selectedCategory = this.value;
+      filterWords();
+      currentIdx = 0;
+      renderFlashcard();
+      renderWordList();
+    });
+
+    let filteredWords = [];
+    function filterWords() {
+      const allWords = JSON.parse(localStorage.getItem('categories') || '[]');
+      if (!selectedCategory) {
+        filteredWords = allWords;
+      } else {
+        filteredWords = allWords.filter(word => word.topic === selectedCategory);
+      }
+      words = filteredWords;
+    }
+
+    renderCategoryFilter();
+    filterWords();
+  </script>
+</body>
+</html> 
